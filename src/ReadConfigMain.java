@@ -5,7 +5,7 @@ import java.io.IOException;
 
 public class ReadConfigMain {
     public static void main(String[] args) throws IOException {
-        System.out.println(System.getProperty("os.name"));
+        System.out.println("My OS is: " + System.getProperty("os.name"));
         //es muessen die Argumente Sender-email-Adresse und Pfad des Anhangs vorliegen
         if (args.length == 0) {
             System.err.println("Arguments Missing!");
