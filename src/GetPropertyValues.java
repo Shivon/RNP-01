@@ -17,16 +17,17 @@ public class GetPropertyValues {
     String betreff;
     String inhalt;
 
+
+    public GetPropertyValues() throws IOException {
+        getPropValues();
+    }
+    //Property Getters
     public String getBetreff() {
         return betreff;
     }
 
     public String getInhalt() {
         return inhalt;
-    }
-
-    public GetPropertyValues() throws IOException {
-        getPropValues();
     }
 
     public String getMailAdress() {
@@ -49,13 +50,13 @@ public class GetPropertyValues {
         return password;
     }
 
+    //Properties aus InputStream lesen, wenn Pfad inkorrekt/Properties nicht vorhanden -> Exception
     public void getPropValues() throws IOException {
 
         try {
             Properties prop = new Properties();
             String propFileName = "config.properties";
 
-           // inputStream = getClass().getClassLoader().getResourceAsStream(propFileName);
             inputStream = new InputStreamReader(new FileInputStream("D:\\git\\RN\\RNP-01\\resources\\config\\config.properties"), "UTF-8");
 
             if (inputStream != null) {

@@ -4,6 +4,7 @@
 
 import org.Base64;
 
+import javax.net.ssl.SSLSocket;
 import java.io.*;
 import java.net.Socket;
 import java.net.UnknownHostException;
@@ -13,18 +14,19 @@ import java.nio.file.Paths;
 
 
 public class TCPClient {
-    /* Portnummer */
+    /* Portnummer des Servers*/
     private final int serverPort;
 
-    /* Hostname */
+    /* Hostname des Servers*/
     private final String hostname;
+
+   // private SSLSocket sslSocket; //SSL-Socket
 
     private Socket clientSocket; // TCP-Standard-Socketklasse
 
     private DataOutputStream outToServer; // Ausgabestream zum Server
     private BufferedReader inFromServer; // Eingabestream vom Server
 
-    private boolean serviceRequested = true; // Client beenden?
     private String user;
     private String password;
     private String recipientEmail;
@@ -65,24 +67,27 @@ public class TCPClient {
 
             sentence = null;
 
-            /* Modifizierten String vom Server empfangen */
+            /* Response from Server */
             String serverResponse = readFromServer();
+            System.out.println("Antwort: " + serverResponse);
             writeToServer("EHLO client.example.de");
-            // Die schleife soll solange laufen, bis der buffer leer ist.
+            System.out.println("EHLO client.example.de");
+            /* Die schleife soll solange laufen, bis der buffer leer ist. */
             for (int i = 0; i < 10; i++) {
                 serverResponse = readFromServer();
+                System.out.println(serverResponse);
             }
             writeToServer("AUTH LOGIN");
             serverResponse = readFromServer();
-//            if(serverResponse.equals("334 VXNlcm5hbWU6")){
-                // Authentifizierung Benutzer und Password mit Base64
-                System.out.println(user + ":" + password);
-                writeToServer(encodeAuthentication(user));
-                readFromServer();
-//                if(serverResponse.equals("334 UGFzc3dvcmQ6")){
-                    writeToServer(encodeAuthentication(password));
-                    readFromServer();
+//          if(serverResponse.equals("334 VXNlcm5hbWU6")){
+            /* Authentification of user and password with Base64 */
+            writeToServer(encodeAuthentication(user));
+            readFromServer();
+//          if(serverResponse.equals("334 UGFzc3dvcmQ6")){
+            writeToServer(encodeAuthentication(password));
+            readFromServer();
 
+            /* send email */
             writeToServer("MAIL FROM:" + this.senderEmail);
             readFromServer();
             writeToServer("RCPT TO:" + this.recipientEmail);
@@ -91,18 +96,18 @@ public class TCPClient {
             readFromServer();
             writeToServer("Subject: " + this.betreff);
 
-            //general MIME settings
+            /* general MIME settings */
             writeToServer("MIME-Version: 1.0");
             writeToServer("Content-Type: multipart/mixed; boundary= " + BOUNDARY);
-            //settings for text body
+
+            /* settings for text body */
             writeToServer("--" + BOUNDARY);
             writeToServer("Content-Transfer-Encoding: quoted-printable");
             writeToServer("Content-Type: text/plain");
             writeToServer("");
             writeToServer(this.inhalt );
 
-
-            //settings for attachment body
+            /* settings for attachment body */
             writeToServer("--" + BOUNDARY);
             writeToServer("Content-Transfer-Encoding: base64");
             writeToServer("Content-Type: text/plain");
@@ -112,12 +117,13 @@ public class TCPClient {
             Path filePath = Paths.get(anhangPfad);
             byte[] anhangInhalt = Files.readAllBytes(filePath);
             writeToServer(encodeAuthentication(new String(anhangInhalt)));
-            //Ende der Nachricht
+
+            /* End of message */
             writeToServer(".");
 
             readFromServer();
             writeToServer("QUIT");
-            
+
             /* Socket-Streams schliessen --> Verbindungsabbau */
             clientSocket.close();
         } catch (IOException e) {
@@ -140,10 +146,9 @@ public class TCPClient {
     }
 
     private String encodeAuthentication(String encrypt){
-//            String encodedUser = new String(Base64.encodeBytesToBytes(encrypt.getBytes("UTF-8")));
             byte[] bytes = encrypt.getBytes();
             String newEncodedString = new String(Base64.encodeBytes(bytes));
-            System.out.println(newEncodedString);
+
             return newEncodedString;
     }
 
