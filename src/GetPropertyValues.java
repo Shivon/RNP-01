@@ -4,8 +4,6 @@ import java.io.*;
 import java.util.Date;
 import java.util.Properties;
 
-import static java.lang.Runtime.getRuntime;
-
 public class GetPropertyValues {
     String result = "";
     InputStreamReader inputStream;
@@ -57,7 +55,7 @@ public class GetPropertyValues {
             Properties prop = new Properties();
             String propFileName = "config.properties";
 
-            inputStream = new InputStreamReader(new FileInputStream("D:\\git\\RN\\RNP-01\\resources\\config\\config.properties"), "UTF-8");
+            inputStream = new InputStreamReader(new FileInputStream(PropertiesPath.getPath()), "UTF-8");
 
             if (inputStream != null) {
                 prop.load(inputStream);

@@ -5,7 +5,8 @@ import java.io.IOException;
 
 public class ReadConfigMain {
     public static void main(String[] args) throws IOException {
-        //es müssen die Argumente Sender-email-Adresse und Pfad des Anhangs vorliegen
+        System.out.println(System.getProperty("os.name"));
+        //es muessen die Argumente Sender-email-Adresse und Pfad des Anhangs vorliegen
         if (args.length == 0) {
             System.err.println("Arguments Missing!");
             System.exit(1);
@@ -14,7 +15,7 @@ public class ReadConfigMain {
         int port = 60000;
         String email = args[0];
         String anhang = args[1];
-        //Sender-Adresse, Sender-Port, Empfänger-Email-Adresse und Anhang
+        //Sender-Adresse, Sender-Port, Empfaenger-Email-Adresse und Anhang
         TCPClient tcp = new TCPClient(addr, port, email, anhang);
         tcp.startJob();
     }
