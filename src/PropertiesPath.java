@@ -1,13 +1,13 @@
 public class PropertiesPath {
-    public static String getPath() throws Exception {
-        if (PropertiesPath.is_Unix()) {
+    public static String getPath() {
+        if (PropertiesPath.isUnix()) {
             return "./resources/config/config.properties";
         } else {
             return ".\\resources\\config\\config.properties";
         }
     }
 
-    private static boolean is_Unix() {
+    private static boolean isUnix() {
         String os = System.getProperty("os.name");
         return (os.startsWith("Linux") || os.startsWith("Mac"));
     }
