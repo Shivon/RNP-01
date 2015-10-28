@@ -20,8 +20,6 @@ public class TCPClient {
     /* Hostname des Servers*/
     private final String hostname;
 
-   // private SSLSocket sslSocket; //SSL-Socket
-
     private Socket clientSocket; // TCP-Standard-Socketklasse
 
     private DataOutputStream outToServer; // Ausgabestream zum Server
