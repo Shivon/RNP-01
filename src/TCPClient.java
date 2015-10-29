@@ -84,9 +84,9 @@ public class TCPClient {
         writeToServer("AUTH LOGIN");
         readFromServer();
         // Authentification of user and password with Base64
-        writeToServer(encodeAuthentication(user));
+        writeToServer(Base64.encodeBytes(user.getBytes()));
         readFromServer();
-        writeToServer(encodeAuthentication(password));
+        writeToServer(Base64.encodeBytes(password.getBytes()));
         readFromServer();
 
         // Send email
@@ -112,13 +112,19 @@ public class TCPClient {
         // Settings for attachment body
         writeToServer("--" + BOUNDARY);
         writeToServer("Content-Transfer-Encoding: base64");
-        writeToServer("Content-Type: text/plain");
+        if (attachmentPath.endsWith(".txt")) {
+            writeToServer("Content-Type: text/plain");
+        } else if (attachmentPath.endsWith(".jpg") || attachmentPath.endsWith(".jpeg")) {
+            writeToServer("Content-Type: image/jpeg");
+        } else {
+            throw new IllegalArgumentException("Attachment format not supported");
+        }
         File attachmentFile = new File(attachmentPath);
         writeToServer("Content-Disposition: attachment; filename=" + attachmentFile.getName());
         writeToServer("");
         Path filePath = Paths.get(attachmentPath);
         byte[] attachmentContent = Files.readAllBytes(filePath);
-        writeToServer(encodeAuthentication(new String(attachmentContent)));
+        writeToServer(Base64.encodeBytes(attachmentContent));
 
         // End of message
         writeToServer(".");
@@ -137,11 +143,5 @@ public class TCPClient {
         String reply = inFromServer.readLine();
         System.out.println("TCP Client got from Server: " + reply);
         return reply;
-    }
-
-    private String encodeAuthentication(String encrypt){
-            byte[] bytes = encrypt.getBytes();
-            String newEncodedString = new String(Base64.encodeBytes(bytes));
-            return newEncodedString;
     }
 }

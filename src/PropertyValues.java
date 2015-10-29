@@ -44,7 +44,17 @@ public class PropertyValues {
             hostName = prop.getProperty("hostName");
             port = prop.getProperty("port");
             subject = prop.getProperty("subject");
-            content = prop.getProperty("mailBody");
+            String temp_content = prop.getProperty("mailBody");
+            System.out.println("Temp_content: " + temp_content);
+            System.out.println("Content: " + content);
+            if (temp_content.contains("\n.")) {
+                content = temp_content.replaceAll("\n.", "\n..");
+            } else if (temp_content.startsWith(".")) {
+                content = temp_content.replaceAll(".", "..");
+            } else {
+                content = temp_content;
+            }
+            System.out.println("Content after if..then...else: " + content);
             result = "Props = " + mailAddress + ", " + user + ", " + password + ", " + hostName + ", " + port;
             System.out.println(result + "\nProgram Ran on " + time + " by user=" + user);
         } catch (Exception e) {
