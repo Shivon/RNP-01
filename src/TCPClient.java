@@ -122,7 +122,6 @@ public class TCPClient {
 
         // End of message
         writeToServer(".");
-
         readFromServer();
         writeToServer("QUIT");
     }
