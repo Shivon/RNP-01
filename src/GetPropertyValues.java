@@ -11,25 +11,25 @@ public class GetPropertyValues {
     String port;
     String user;
     String password;
-    String mailAdress;
-    String betreff;
-    String inhalt;
-
+    String mailAddress;
+    String subject;
+    String content;
 
     public GetPropertyValues() throws IOException {
         getPropValues();
     }
-    //Property Getters
-    public String getBetreff() {
-        return betreff;
+
+    // Property getters
+    public String getSubject() {
+        return subject;
     }
 
-    public String getInhalt() {
-        return inhalt;
+    public String getContent() {
+        return content;
     }
 
-    public String getMailAdress() {
-        return mailAdress;
+    public String getMailAddress() {
+        return mailAddress;
     }
 
     public String getHostName() {
@@ -48,9 +48,9 @@ public class GetPropertyValues {
         return password;
     }
 
-    //Properties aus InputStream lesen, wenn Pfad inkorrekt/Properties nicht vorhanden -> Exception
+    // Read properties from input stream
+    // Exception when path incorrect/ properties not existent
     public void getPropValues() throws IOException {
-
         try {
             Properties prop = new Properties();
             String propFileName = "config.properties";
@@ -65,15 +65,15 @@ public class GetPropertyValues {
 
             Date time = new Date(System.currentTimeMillis());
 
-            // get the property value and print it out
-            mailAdress = prop.getProperty("mailAddress");
+            // Get property value and print it out
+            mailAddress = prop.getProperty("mailAddress");
             user = prop.getProperty("user");
             password = prop.getProperty("password");
             hostName = prop.getProperty("hostName");
             port = prop.getProperty("port");
-            betreff = prop.getProperty("betreff");
-            inhalt = prop.getProperty("mailbody");
-            result = "Props = " + mailAdress + ", " + user + ", " + password + ", " + hostName + ", " + port;
+            subject = prop.getProperty("betreff");
+            content = prop.getProperty("mailbody");
+            result = "Props = " + mailAddress + ", " + user + ", " + password + ", " + hostName + ", " + port;
             System.out.println(result + "\nProgram Ran on " + time + " by user=" + user);
         } catch (Exception e) {
             System.out.println("Exception: " + e);

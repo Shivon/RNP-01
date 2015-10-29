@@ -1,128 +1,124 @@
-/**
- * Created by Jana on 24.10.2015.
- */
-
 import org.Base64;
-
-import javax.net.ssl.SSLSocket;
 import java.io.*;
 import java.net.Socket;
-import java.net.UnknownHostException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
 
 public class TCPClient {
-    /* Portnummer des Servers*/
+    // Port number of server
     private final int serverPort;
 
-    /* Hostname des Servers*/
+    // Server hostname
     private final String hostname;
+    // TCP standard socket class
+    private Socket clientSocket;
 
-    private Socket clientSocket; // TCP-Standard-Socketklasse
-
-    private DataOutputStream outToServer; // Ausgabestream zum Server
-    private BufferedReader inFromServer; // Eingabestream vom Server
+    // Output stream to server
+    private DataOutputStream outToServer;
+    // Input stream from server
+    private BufferedReader inFromServer;
 
     private String user;
     private String password;
     private String recipientEmail;
     private String senderEmail;
-    private String betreff;
-    private String inhalt;
-    private String anhangPfad;
+    private String subject;
+    private String content;
+    private String attachmentPath;
     private final String BOUNDARY = "tudelu";
 
-    public TCPClient(String hostname, int serverPort, String email, String anhang) {
+    public TCPClient(String hostname, int serverPort, String email, String attachment) {
         this.serverPort = serverPort;
         this.hostname = hostname;
         this.recipientEmail = email;
-        this.anhangPfad = anhang;
+        this.attachmentPath = attachment;
         try {
             GetPropertyValues gpv = new GetPropertyValues();
             user = gpv.getUser();
             password = gpv.getPassword();
-            senderEmail = gpv.getMailAdress();
-            betreff = gpv.getBetreff();
-            inhalt = gpv.getInhalt();
+            senderEmail = gpv.getMailAddress();
+            subject = gpv.getSubject();
+            content = gpv.getContent();
         }  catch (Exception e) {
             e.printStackTrace();
         }
     }
 
     public void startJob() {
-        /* Client starten. Ende, wenn quit eingegeben wurde */
-        String sentence; // vom User uebergebener String
+        // Start client. Type "quit" for terminating
+        // String entered by user
+        String sentence;
         try {
-            /* Socket erzeugen --> Verbindungsaufbau mit dem Server */
+            // Create socket --> connection establishment with server
             clientSocket = new Socket(hostname, serverPort);
 
-            /* Socket-Basisstreams durch spezielle Streams filtern */
+            // Filter socket basic stream by special streams
             outToServer = new DataOutputStream(clientSocket.getOutputStream());
             inFromServer = new BufferedReader(new InputStreamReader(
                     clientSocket.getInputStream()));
 
             sentence = null;
 
-            /* Response from Server */
+            // Response from Server
             String serverResponse = readFromServer();
             System.out.println("Antwort: " + serverResponse);
             writeToServer("EHLO client.example.de");
             System.out.println("EHLO client.example.de");
-            /* Die schleife soll solange laufen, bis der buffer leer ist. */
+            // Loop terminates when buffer is empty
             for (int i = 0; i < 10; i++) {
                 serverResponse = readFromServer();
                 System.out.println(serverResponse);
             }
             writeToServer("AUTH LOGIN");
             serverResponse = readFromServer();
-//          if(serverResponse.equals("334 VXNlcm5hbWU6")){
-            /* Authentification of user and password with Base64 */
+            // if(serverResponse.equals("334 VXNlcm5hbWU6")){
+            // Authentification of user and password with Base64
             writeToServer(encodeAuthentication(user));
             readFromServer();
-//          if(serverResponse.equals("334 UGFzc3dvcmQ6")){
+            // if(serverResponse.equals("334 UGFzc3dvcmQ6")){
             writeToServer(encodeAuthentication(password));
             readFromServer();
 
-            /* send email */
+            // Send email
             writeToServer("MAIL FROM:" + this.senderEmail);
             readFromServer();
             writeToServer("RCPT TO:" + this.recipientEmail);
             readFromServer();
             writeToServer("DATA");
             readFromServer();
-            writeToServer("Subject: " + this.betreff);
+            writeToServer("Subject: " + this.subject);
 
-            /* general MIME settings */
+            // General MIME settings
             writeToServer("MIME-Version: 1.0");
             writeToServer("Content-Type: multipart/mixed; boundary= " + BOUNDARY);
 
-            /* settings for text body */
+            // Settings for text body
             writeToServer("--" + BOUNDARY);
             writeToServer("Content-Transfer-Encoding: quoted-printable");
             writeToServer("Content-Type: text/plain");
             writeToServer("");
-            writeToServer(this.inhalt );
+            writeToServer(this.content);
 
-            /* settings for attachment body */
+            // Settings for attachment body
             writeToServer("--" + BOUNDARY);
             writeToServer("Content-Transfer-Encoding: base64");
             writeToServer("Content-Type: text/plain");
-            File anhangFile = new File(anhangPfad);
-            writeToServer("Content-Disposition: attachment; filename=" + anhangFile.getName());
+            File attachmentFile = new File(attachmentPath);
+            writeToServer("Content-Disposition: attachment; filename=" + attachmentFile.getName());
             writeToServer("");
-            Path filePath = Paths.get(anhangPfad);
-            byte[] anhangInhalt = Files.readAllBytes(filePath);
-            writeToServer(encodeAuthentication(new String(anhangInhalt)));
+            Path filePath = Paths.get(attachmentPath);
+            byte[] attachmentContent = Files.readAllBytes(filePath);
+            writeToServer(encodeAuthentication(new String(attachmentContent)));
 
-            /* End of message */
+            // End of message
             writeToServer(".");
 
             readFromServer();
             writeToServer("QUIT");
 
-            /* Socket-Streams schliessen --> Verbindungsabbau */
+            // Close socket-stream --> connection termination
             clientSocket.close();
         } catch (IOException e) {
             System.err.println("Connection aborted by server!");
@@ -131,13 +127,13 @@ public class TCPClient {
     }
 
     private void writeToServer(String request) throws IOException {
-        /* Sende eine Zeile (mit CRLF) zum Server */
+        // Send one line (with CRLF) to server
         outToServer.writeBytes(request + '\r' + '\n');
         System.out.println("TCP Client has sent the message: " + request);
     }
 
     private String readFromServer() throws IOException {
-        /* Lies die Antwort (reply) vom Server */
+        // Read reply from server
         String reply = inFromServer.readLine();
         System.out.println("TCP Client got from Server: " + reply);
         return reply;
@@ -146,8 +142,6 @@ public class TCPClient {
     private String encodeAuthentication(String encrypt){
             byte[] bytes = encrypt.getBytes();
             String newEncodedString = new String(Base64.encodeBytes(bytes));
-
             return newEncodedString;
     }
-
 }
