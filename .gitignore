@@ -1,6 +1,9 @@
 # IntelliJ related stuff
 /.idea
 RNP-01_SMTP-Client.iml
+RNP-01.iml
 /out
 /build
+
+# Login data for server
 Login.txt
