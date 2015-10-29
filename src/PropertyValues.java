@@ -4,7 +4,7 @@ import java.io.*;
 import java.util.Date;
 import java.util.Properties;
 
-public class GetPropertyValues {
+public class PropertyValues {
     String result = "";
     InputStreamReader inputStream;
     String hostName;
@@ -15,13 +15,13 @@ public class GetPropertyValues {
     String subject;
     String content;
 
-    public GetPropertyValues() throws IOException {
-        getPropValues();
+    public PropertyValues() throws IOException {
+        getValues();
     }
 
     // Read properties from input stream
     // Exception when path incorrect/ properties not existent
-    public void getPropValues() throws IOException {
+    public void getValues() throws IOException {
         try {
             Properties prop = new Properties();
             String propFileName = "config.properties";

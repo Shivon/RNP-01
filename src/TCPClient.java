@@ -34,7 +34,7 @@ public class TCPClient {
         this.recipientEmail = email;
         this.attachmentPath = attachment;
         try {
-            GetPropertyValues gpv = new GetPropertyValues();
+            PropertyValues gpv = new PropertyValues();
             user = gpv.getUser();
             password = gpv.getPassword();
             senderEmail = gpv.getMailAddress();
@@ -48,6 +48,7 @@ public class TCPClient {
     public void startJob() {
         // Start client. Type "quit" for terminating
         // String entered by user
+        // TODO: use sentence for params from command line
         String sentence;
         try {
             // Create socket --> connection establishment with server
@@ -55,67 +56,9 @@ public class TCPClient {
 
             // Filter socket basic stream by special streams
             outToServer = new DataOutputStream(clientSocket.getOutputStream());
-            inFromServer = new BufferedReader(new InputStreamReader(
-                    clientSocket.getInputStream()));
-
+            inFromServer = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
             sentence = null;
-
-            // Response from Server
-            String serverResponse = readFromServer();
-            System.out.println("Antwort: " + serverResponse);
-            writeToServer("EHLO client.example.de");
-            System.out.println("EHLO client.example.de");
-            // Loop terminates when buffer is empty
-            for (int i = 0; i < 10; i++) {
-                serverResponse = readFromServer();
-                System.out.println(serverResponse);
-            }
-            writeToServer("AUTH LOGIN");
-            serverResponse = readFromServer();
-            // if(serverResponse.equals("334 VXNlcm5hbWU6")){
-            // Authentification of user and password with Base64
-            writeToServer(encodeAuthentication(user));
-            readFromServer();
-            // if(serverResponse.equals("334 UGFzc3dvcmQ6")){
-            writeToServer(encodeAuthentication(password));
-            readFromServer();
-
-            // Send email
-            writeToServer("MAIL FROM:" + this.senderEmail);
-            readFromServer();
-            writeToServer("RCPT TO:" + this.recipientEmail);
-            readFromServer();
-            writeToServer("DATA");
-            readFromServer();
-            writeToServer("Subject: " + this.subject);
-
-            // General MIME settings
-            writeToServer("MIME-Version: 1.0");
-            writeToServer("Content-Type: multipart/mixed; boundary= " + BOUNDARY);
-
-            // Settings for text body
-            writeToServer("--" + BOUNDARY);
-            writeToServer("Content-Transfer-Encoding: quoted-printable");
-            writeToServer("Content-Type: text/plain");
-            writeToServer("");
-            writeToServer(this.content);
-
-            // Settings for attachment body
-            writeToServer("--" + BOUNDARY);
-            writeToServer("Content-Transfer-Encoding: base64");
-            writeToServer("Content-Type: text/plain");
-            File attachmentFile = new File(attachmentPath);
-            writeToServer("Content-Disposition: attachment; filename=" + attachmentFile.getName());
-            writeToServer("");
-            Path filePath = Paths.get(attachmentPath);
-            byte[] attachmentContent = Files.readAllBytes(filePath);
-            writeToServer(encodeAuthentication(new String(attachmentContent)));
-
-            // End of message
-            writeToServer(".");
-
-            readFromServer();
-            writeToServer("QUIT");
+            communicateWithServer();
 
             // Close socket-stream --> connection termination
             clientSocket.close();
@@ -123,6 +66,65 @@ public class TCPClient {
             System.err.println("Connection aborted by server!");
         }
         System.out.println("TCP Client stopped!");
+    }
+
+    // --- PRIVATE METHODS ---
+
+    private void communicateWithServer() throws IOException {
+        // Response from Server
+        String serverResponse = readFromServer();
+        System.out.println("Antwort: " + serverResponse);
+        writeToServer("EHLO client.example.de");
+        System.out.println("EHLO client.example.de");
+        // Loop terminates when buffer is empty
+        for (int i = 0; i < 10; i++) {
+            serverResponse = readFromServer();
+            System.out.println(serverResponse);
+        }
+        writeToServer("AUTH LOGIN");
+        readFromServer();
+        // Authentification of user and password with Base64
+        writeToServer(encodeAuthentication(user));
+        readFromServer();
+        writeToServer(encodeAuthentication(password));
+        readFromServer();
+
+        // Send email
+        writeToServer("MAIL FROM:" + this.senderEmail);
+        readFromServer();
+        writeToServer("RCPT TO:" + this.recipientEmail);
+        readFromServer();
+        writeToServer("DATA");
+        readFromServer();
+        writeToServer("Subject: " + this.subject);
+
+        // General MIME settings
+        writeToServer("MIME-Version: 1.0");
+        writeToServer("Content-Type: multipart/mixed; boundary= " + BOUNDARY);
+
+        // Settings for text body
+        writeToServer("--" + BOUNDARY);
+        writeToServer("Content-Transfer-Encoding: quoted-printable");
+        writeToServer("Content-Type: text/plain");
+        writeToServer("");
+        writeToServer(this.content);
+
+        // Settings for attachment body
+        writeToServer("--" + BOUNDARY);
+        writeToServer("Content-Transfer-Encoding: base64");
+        writeToServer("Content-Type: text/plain");
+        File attachmentFile = new File(attachmentPath);
+        writeToServer("Content-Disposition: attachment; filename=" + attachmentFile.getName());
+        writeToServer("");
+        Path filePath = Paths.get(attachmentPath);
+        byte[] attachmentContent = Files.readAllBytes(filePath);
+        writeToServer(encodeAuthentication(new String(attachmentContent)));
+
+        // End of message
+        writeToServer(".");
+
+        readFromServer();
+        writeToServer("QUIT");
     }
 
     private void writeToServer(String request) throws IOException {
