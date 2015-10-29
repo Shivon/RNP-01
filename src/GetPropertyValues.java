@@ -19,6 +19,41 @@ public class GetPropertyValues {
         getPropValues();
     }
 
+    // Read properties from input stream
+    // Exception when path incorrect/ properties not existent
+    public void getPropValues() throws IOException {
+        try {
+            Properties prop = new Properties();
+            String propFileName = "config.properties";
+
+            inputStream = new InputStreamReader(new FileInputStream(PropertiesPath.getPath()), "UTF-8");
+
+            // TODO: Check this! Always true??
+            if (inputStream != null) {
+                prop.load(inputStream);
+            } else {
+                throw new FileNotFoundException("property file '" + propFileName + "' not found in the classpath");
+            }
+
+            Date time = new Date(System.currentTimeMillis());
+
+            // Get property value and print it out
+            mailAddress = prop.getProperty("mailAddress");
+            user = prop.getProperty("user");
+            password = prop.getProperty("password");
+            hostName = prop.getProperty("hostName");
+            port = prop.getProperty("port");
+            subject = prop.getProperty("subject");
+            content = prop.getProperty("content");
+            result = "Props = " + mailAddress + ", " + user + ", " + password + ", " + hostName + ", " + port;
+            System.out.println(result + "\nProgram Ran on " + time + " by user=" + user);
+        } catch (Exception e) {
+            System.out.println("Exception: " + e);
+        } finally {
+            inputStream.close();
+        }
+    }
+
     // Property getters
     public String getSubject() {
         return subject;
@@ -46,39 +81,5 @@ public class GetPropertyValues {
 
     public String getPassword() {
         return password;
-    }
-
-    // Read properties from input stream
-    // Exception when path incorrect/ properties not existent
-    public void getPropValues() throws IOException {
-        try {
-            Properties prop = new Properties();
-            String propFileName = "config.properties";
-
-            inputStream = new InputStreamReader(new FileInputStream(PropertiesPath.getPath()), "UTF-8");
-
-            if (inputStream != null) {
-                prop.load(inputStream);
-            } else {
-                throw new FileNotFoundException("property file '" + propFileName + "' not found in the classpath");
-            }
-
-            Date time = new Date(System.currentTimeMillis());
-
-            // Get property value and print it out
-            mailAddress = prop.getProperty("mailAddress");
-            user = prop.getProperty("user");
-            password = prop.getProperty("password");
-            hostName = prop.getProperty("hostName");
-            port = prop.getProperty("port");
-            subject = prop.getProperty("betreff");
-            content = prop.getProperty("mailbody");
-            result = "Props = " + mailAddress + ", " + user + ", " + password + ", " + hostName + ", " + port;
-            System.out.println(result + "\nProgram Ran on " + time + " by user=" + user);
-        } catch (Exception e) {
-            System.out.println("Exception: " + e);
-        } finally {
-            inputStream.close();
-        }
     }
 }

@@ -7,11 +7,10 @@ import java.nio.file.Paths;
 
 
 public class TCPClient {
-    // Port number of server
-    private final int serverPort;
-
     // Server hostname
     private final String hostname;
+    // Port number of server
+    private final int serverPort;
     // TCP standard socket class
     private Socket clientSocket;
 
