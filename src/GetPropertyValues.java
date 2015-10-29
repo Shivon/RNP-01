@@ -44,7 +44,7 @@ public class GetPropertyValues {
             hostName = prop.getProperty("hostName");
             port = prop.getProperty("port");
             subject = prop.getProperty("subject");
-            content = prop.getProperty("content");
+            content = prop.getProperty("mailBody");
             result = "Props = " + mailAddress + ", " + user + ", " + password + ", " + hostName + ", " + port;
             System.out.println(result + "\nProgram Ran on " + time + " by user=" + user);
         } catch (Exception e) {
